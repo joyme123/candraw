@@ -1,0 +1,33 @@
+<!Doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>画图</title>
+        <script src="require.js"></script>
+        <style type="text/css">
+            canvas{
+                border:1px solid #000;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="main" width="300" height="300">当前浏览器不支持canvas</canvas>
+        <script>
+            require([
+                '../core/dv',
+                '../core/item'
+            ], function(dv,Item) {
+                'use strict';
+                var canvas = document.getElementById('main');
+                var ctx = canvas.getContext('2d');
+
+                var item = new Item(null,null);
+ 
+                var dv = dv.init(ctx);
+                dv.addItem(item);
+                dv.paint()
+            });
+            
+        </script>
+    </body>
+</html>
