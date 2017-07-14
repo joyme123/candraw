@@ -11,7 +11,7 @@
         </style>
     </head>
     <body>
-        <canvas id="main" width="300" height="300">当前浏览器不支持canvas</canvas>
+        <canvas id="main" width="2000" height="800">当前浏览器不支持canvas</canvas>
         <script>
             require([
                 '../core/dv',
@@ -21,8 +21,53 @@
                 var canvas = document.getElementById('main');
                 var ctx = canvas.getContext('2d');
 
-                var item = new Item(null,null);
- 
+                var item = new Item();
+                item.setText("本人");
+
+                var item1 = new Item();
+                item1.setText("父亲");
+                item.addParent(item1);
+
+                var itemm = new Item();
+                itemm.setText("母亲");
+                item.addParent(itemm);
+
+                var item2 = new Item();
+                item2.setText("兄弟");
+                item.addSibling(item2);
+
+                var item3 = new Item();
+                item3.setText("孩子");
+                item.addChild(item3);
+
+                var itemr = new Item();
+                itemr.setText("儿子");
+                item.addChild(itemr);
+
+                var itemr1 = new Item();
+                itemr1.setText("儿子1");
+                item.addChild(itemr1);
+
+                var item4 = new Item();
+                item4.setText("兄弟2");
+                item.addSibling(item4);
+
+                var item5 = new Item();
+                item5.setText("兄弟3");
+                item.addSibling(item5);
+
+                var item7 = new Item();
+                item7.setText("兄弟4");
+                item.addSibling(item7);
+
+                var item6 = new Item();
+                item6.setText("兄弟6");
+                item.addSibling(item6);
+
+                var item6r = new Item();
+                item6r.setText("兄弟6儿子");
+                item6.addChild(item6r);
+
                 var dv = dv.init(ctx);
                 dv.addItem(item);
                 dv.paint()

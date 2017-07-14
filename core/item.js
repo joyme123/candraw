@@ -1,44 +1,35 @@
-define(function() {
+define(['./ItemStyle'],function(ItemStyle) {
     'use strict';
     
 
 
     var Item = function(){
         this.style = new ItemStyle();
+        this.siblings = new Array();
+        this.parents = new Array();
+        this.children = new Array();
+        this.x = 0;
+        this.y = 0;
+        this.text = "";
+        this.level = 0;
+        //this.key = 0;       //根据key可以对同级的item进行排序
     }
 
     Item.prototype = {
-        config:{},
-        parents:[],
-        siblings:[],
-        children:[],
 
         getStyle:function(){
             return this.style;
         },
 
         addParent:function(parent){
-            if(this.parents == undefined){
-                this.parents = new Array();
-            }
-
             this.parents.push(parent);
         },
 
         addSibling:function(sibling){
-            if(this.siblings == undefined){
-                this.siblings = new Array();
-                
-            }
-
             this.siblings.push(sibling);
         },
 
         addChild:function(child){
-            if(this.children == null){
-                this.children = new Array();
-            }
-
             this.children.push(child);
         },
 
@@ -52,45 +43,48 @@ define(function() {
 
         getChildren:function(){
             return this.children;
+        },
+
+        setPosition:function(x,y){
+            this.x = x;
+            this.y = y;
+        },
+
+        getX:function(){
+            return this.x;
+        },
+
+        getY:function(){
+            return this.y;
+        },
+
+        setText:function(text){
+            this.text = text;
+        },
+
+        getText:function(){
+            return this.text;
+        },
+
+        setLevel:function(level){
+            this.level = level;
+        },
+
+        getLevel:function(){
+            return this.level;
+        },
+
+        setKey:function(key){
+            this.key = key;
+        },
+
+        getKey:function(){
+            return this.key;
         }
 
     }
 
-    var ItemStyle = function(){
-
-    }
     
-    ItemStyle.prototype = {
-        width:80,
-        height:100,
-        backgroundColor:'blue',
-        this:this,
-
-        setWidth:function(width){
-            this.width = width;
-        },
-
-        setHeight:function(height){
-            this.height = height;
-        },
-
-        setBackgroundColor:function(color){
-            this.color = color;
-        },
-
-        getWidth:function(){
-            return this.width;
-        },
-
-        getHeight:function(){
-            return this.height;
-        },
-
-        getBackgroundColor:function(){
-            return this.backgroundColor;
-        }
-        
-    }
 
     return Item;
 });
