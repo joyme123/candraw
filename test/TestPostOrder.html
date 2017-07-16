@@ -37,62 +37,62 @@
                 var N = new Node('N');
                 var O = new Node('O');
 
-                O.__proto__.offspring = E;
+                O.offspring = E;
                 
-                E.__proto__.parent = O;
-                E.__proto__.rightSibling = F;
-                E.__proto__.offspring = A;
+                E.parent = O;
+                E.rightSibling = F;
+                E.offspring = A;
 
-                F.__proto__.parent = O;
-                F.__proto__.leftSibling = E;
-                F.__proto__.rightSibling = N;
+                F.parent = O;
+                F.leftSibling = E;
+                F.rightSibling = N;
                 
-                N.__proto__.parent = O;
-                N.__proto__.leftSibling = F;
-                N.__proto__.offspring = G;
+                N.parent = O;
+                N.leftSibling = F;
+                N.offspring = G;
 
-                A.__proto__.parent = E;
-                A.__proto__.rightSibling = D;
+                A.parent = E;
+                A.rightSibling = D;
                 
-                D.__proto__.parent = E;
-                D.__proto__.leftSibling = A;
-                D.__proto__.offspring = B;
+                D.parent = E;
+                D.leftSibling = A;
+                D.offspring = B;
 
-                B.__proto__.parent = D;
-                B.__proto__.rightSibling = C;
+                B.parent = D;
+                B.rightSibling = C;
 
-                C.__proto__.parent = D;
-                C.__proto__.leftSibling = B;
+                C.parent = D;
+                C.leftSibling = B;
 
-                G.__proto__.parent = N;
-                G.__proto__.rightSibling = M;
+                G.parent = N;
+                G.rightSibling = M;
 
-                M.__proto__.parent = N;
-                M.__proto__.leftSibling = G;
-                M.__proto__.offspring = H;
+                M.parent = N;
+                M.leftSibling = G;
+                M.offspring = H;
 
-                H.__proto__.parent = M;
-                H.__proto__.rightSibling = I;
+                H.parent = M;
+                H.rightSibling = I;
 
-                I.__proto__.parent = M;
-                I.__proto__.leftSibling = H;
-                I.__proto__.rightSibling = J;
+                I.parent = M;
+                I.leftSibling = H;
+                I.rightSibling = J;
 
-                J.__proto__.parent = M;
-                J.__proto__.leftSibling = I;
-                J.__proto__.rightSibling = K;
+                J.parent = M;
+                J.leftSibling = I;
+                J.rightSibling = K;
 
-                K.__proto__.parent = M;
-                K.__proto__.leftSibling = J;
-                K.__proto__.rightSibling = L;
+                K.parent = M;
+                K.leftSibling = J;
+                K.rightSibling = L;
 
-                L.__proto__.parent = M;
-                L.__proto__.leftSibling = K;
+                L.parent = M;
+                L.leftSibling = K;
 
 
                 var context = document.getElementById('main').getContext('2d');
                 var dv = new Dv(context);
-                dv.paint(O);
+                dv.postOrder(O);
 
                 log("A:",A.prelim,A.modifier);
                 log("B:",B.prelim,B.modifier);
