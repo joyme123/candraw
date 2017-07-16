@@ -10,8 +10,8 @@ define(['./node','./config'],function(Node,DvConfig) {
 
     Dv.prototype.toLeftMost = function(startNode){
         var tmp = startNode;
-        while(tmp.__proto__.offspring != null){
-            tmp = tmp.__proto__.offspring;
+        while(tmp.offspring != null){
+            tmp = tmp.offspring;
             level++;
         }
 
@@ -20,25 +20,27 @@ define(['./node','./config'],function(Node,DvConfig) {
 
     Dv.prototype.toRightMost = function(startNode){
         var tmp = startNode;
-        while(tmp.__proto__.offspring != null){
-            tmp = tmp.__proto__.offspring;
-            while(tmp.__proto__.rightSibling != null){
-                tmp = tmp.__proto__.rightSibling;
+        while(tmp.offspring != null){
+            tmp = tmp.offspring;
+            while(tmp.rightSibling != null){
+                tmp = tmp.rightSibling;
             }
         }
         return tmp;
     }
 
     Dv.prototype.toNextLevelLeftMost = function(startNode){
-        return startNode.__proto__.offspring;
+        var tmp = startNode.offspring;
+        console.log("hahahah:",startNode.offspring.key);
+        return tmp;
     }
 
 
     Dv.prototype.toNextLevelRightMost = function(startNode){
-        var tmp = startNode.__proto__.offspring;
+        var tmp = startNode.offspring;
         if(tmp != null){
-            while(tmp.__proto__.rightSibling != null){
-                tmp = tmp.__proto__.rightSibling;
+            while(tmp.rightSibling != null){
+                tmp = tmp.rightSibling;
             }
         }
 
@@ -49,36 +51,35 @@ define(['./node','./config'],function(Node,DvConfig) {
     Dv.prototype.postOrder = function (startNode){
         levelList[level] = new Array();
         levelList[level].push(startNode);
-        
-        startNode.__proto__.level = level;
+        startNode.level = level;
         var node = this.toLeftMost(startNode);
         var prevNode = null;
         var leftNode = null;
 
         //倒序遍历还没有到起点
-        while(node.__proto__.parent != null){
+        while(node.parent != null){
 
-            if((leftNode = node.__proto__.leftSibling) == null){
+            if((leftNode = node.leftSibling) == null){
                 //最左边的点
                 
-                if(node.__proto__.offspring != null){
+                if(node.offspring != null){
                     //存在孩子
-                    node.__proto__.prelim = (node.__proto__.offspring.__proto__.prelim + prevNode.__proto__.prelim) / 2;
-                    node.__proto__.modifier = 0;
+                    node.prelim = (node.offspring.prelim + prevNode.prelim) / 2;
+                    node.modifier = 0;
                 }else{
-                    node.__proto__.prelim = 0;
-                    node.__proto__.modifier = 0;
+                    node.prelim = 0;
+                    node.modifier = 0;
                 }
             }else{
                 //不是最左边的点
-                if(node.__proto__.offspring != null){
+                if(node.offspring != null){
                     //存在孩子
-                    node.__proto__.prelim = leftNode.__proto__.prelim + DvConfig.__proto__.SiblingSeparation + (leftNode.__proto__.width + node.__proto__.width) / 2;
-                    node.__proto__.modifier = node.__proto__.prelim - (node.__proto__.offspring.__proto__.prelim + prevNode.__proto__.prelim) / 2;
+                    node.prelim = leftNode.prelim + DvConfig.SiblingSeparation + (leftNode.width + node.width) / 2;
+                    node.modifier = node.prelim - (node.offspring.prelim + prevNode.prelim) / 2;
                 }else{
                     //不存在孩子
-                    node.__proto__.prelim = leftNode.__proto__.prelim + DvConfig.__proto__.SiblingSeparation + (leftNode.__proto__.width + node.__proto__.width) / 2;
-                    node.__proto__.modifier = 0;
+                    node.prelim = leftNode.prelim + DvConfig.SiblingSeparation + (leftNode.width + node.width) / 2;
+                    node.modifier = 0;
                 }
             }
             
@@ -96,7 +97,7 @@ define(['./node','./config'],function(Node,DvConfig) {
             }else{
                  //move to parent,update prev node
                  prevNode = node;
-                 node = node.__proto__.parent;
+                 node = node.parent;
                  level--;
             }
         }
@@ -112,8 +113,8 @@ define(['./node','./config'],function(Node,DvConfig) {
         }
 
         //最后更新startNode
-        startNode.__proto__.prelim = (startNode.__proto__.offspring.__proto__.prelim + prevNode.__proto__.prelim) / 2;
-        startNode.__proto__.modifier = 0;
+        startNode.prelim = (startNode.offspring.prelim + prevNode.prelim) / 2;
+        startNode.modifier = 0;
 
         //打印全部用来调试
         this.print();
@@ -134,16 +135,16 @@ define(['./node','./config'],function(Node,DvConfig) {
     Dv.prototype.getX = function(node){
         var modifier = 0;
         var tmp = node;
-        while(tmp.__proto__.parent != null){
-            tmp = tmp.__proto__.parent;
-            modifier += tmp.__proto__.modifier;
+        while(tmp.parent != null){
+            tmp = tmp.parent;
+            modifier += tmp.modifier;
         }
 
-        return node.__proto__.prelim + modifier;
+        return node.prelim + modifier;
     }
 
     Dv.prototype.adjust = function(lNode,rNode){
-        if(lNode.__proto__.offspring == null || rNode.__proto__.offspring == null){
+        if(lNode.offspring == null || rNode.offspring == null){
             return;
         }
 
@@ -155,18 +156,18 @@ define(['./node','./config'],function(Node,DvConfig) {
 
         var adjust = 0; //需要调整的距离
 
-        if(rx - lx < DvConfig.SubtreeSeparation + (lNode.__proto__.width + rNode.__proto__.width) / 2){
-            adjust = DvConfig.SubtreeSeparation + (lNode.__proto__.width + rNode.__proto__.width) / 2 - (rx - lx);
+        if(rx - lx < DvConfig.SubtreeSeparation + (lNode.width + rNode.width) / 2){
+            adjust = DvConfig.SubtreeSeparation + (lNode.width + rNode.width) / 2 - (rx - lx);
             this.printNode("调整的节点:",rNode);
         }
 
         if(adjust != 0){
             //如果需要调整,就对level 1的节点进行调整
-            while(rNode.__proto__.parent.__proto__.parent != null){
-                rNode = rNode.__proto__.parent;
+            while(rNode.parent.parent != null){
+                rNode = rNode.parent;
             }
-            rNode.__proto__.prelim += adjust;
-            rNode.__proto__.modifier += adjust;
+            rNode.prelim += adjust;
+            rNode.modifier += adjust;
 
             //调整最左边和当前调整点之间的距离
             var leftMostNode = levelList[1][0];
@@ -181,8 +182,8 @@ define(['./node','./config'],function(Node,DvConfig) {
             if(count > 0){
                 var middleAdjust = adjust / (count + 1);
                 for(var i = 1; i < levelList[1].length && levelList[1][i] != rNode;i++){
-                    levelList[1][i].__proto__.prelim += middleAdjust;
-                    levelList[1][i].__proto__.modifier += middleAdjust;       
+                    levelList[1][i].prelim += middleAdjust;
+                    levelList[1][i].modifier += middleAdjust;       
                 }
             }
         }
@@ -194,61 +195,61 @@ define(['./node','./config'],function(Node,DvConfig) {
             return;
         }
         this.printNode("计算点:",node);
-        node.__proto__.x = node.__proto__.prelim + modifierSum;
-        node.__proto__.y = node.__proto__.level * DvConfig.LevelSeparation;
+        node.x = node.prelim + modifierSum;
+        node.y = node.level * DvConfig.LevelSeparation;
 
-        if(node.__proto__.parent != null){
+        if(node.parent != null){
             //node有父节点
-            var centerX = node.__proto__.x+(node.__proto__.width / 2);
-            var centerY = (node.__proto__.y - DvConfig.LevelSeparation / 2);
-            svgPath += "M " + centerX + " " + node.__proto__.y + "L " + centerX + " " + centerY;
+            var centerX = node.x+(node.width / 2);
+            var centerY = (node.y - DvConfig.LevelSeparation / 2);
+
+            svgPath += "M " + centerX + " " + node.y + "L " + centerX + " " + centerY;
         }
 
-        if(node.__proto__.offspring != null){
+        if(node.offspring != null){
             //node有子节点
-            var centerX = node.__proto__.x+(node.__proto__.width / 2);
-            var centerY = (node.__proto__.y + DvConfig.__proto__.LevelSeparation / 2);
-            svgPath += "M " + centerX + " " + node.__proto__.y + "L " + centerX + " " + centerY;
+            var centerX = node.x+(node.width / 2);
+            var centerY = (node.y + DvConfig.LevelSeparation / 2);
+            svgPath += "M " + centerX + " " + node.y + "L " + centerX + " " + centerY;
             //父节点和子节点间的横线
             {
                 var leftMostNode = this.toNextLevelLeftMost(node);
                 var rightMostNode = this.toNextLevelRightMost(node);
-                var leftCoorX = leftMostNode.__proto__.x +(leftMostNode.__proto__.width / 2);
-                var leftCoorY = leftMostNode.__proto__.y +  DvConfig.LevelSeparation / 2;
-                var rightCoorX = rightMostNode.__proto__.x + (rightMostNode.__proto__.width / 2);
-                var rightCoorY = rightMostNode.__proto__.y + DvConfig.LevelSeparation / 2;
-                console.log("X是否相等",leftCoorX == rightCoorX)
-                console.log("Y是否相等",leftCoorY == rightCoorY)
+                var leftCoorX = leftMostNode.x +(leftMostNode.width / 2);
+                var leftCoorY = leftMostNode.y +  DvConfig.LevelSeparation / 2;
+                var rightCoorX = rightMostNode.x + (rightMostNode.width / 2);
+                var rightCoorY = rightMostNode.y + DvConfig.LevelSeparation / 2;
+               
                 svgPath += "M " + leftCoorX + " " + leftCoorY + "L " + rightCoorX + " " + rightCoorY;
             }
-            this.calculate(node.__proto__.offspring,modifierSum+node.__proto__.modifier);
+            this.calculate(node.offspring,modifierSum+node.modifier);
         }
 
-        while(node.__proto__.rightSibling != null){
-            node = node.__proto__.rightSibling;
-            node.__proto__.x = node.__proto__.prelim + modifierSum;
-            node.__proto__.y = node.__proto__.level * DvConfig.LevelSeparation;
-            var centerX = node.__proto__.x+(node.__proto__.width / 2);
-            var centerY = (node.__proto__.y - DvConfig.LevelSeparation / 2);
+        while(node.rightSibling != null){
+            node = node.rightSibling;
+            node.x = node.prelim + modifierSum;
+            node.y = node.level * DvConfig.LevelSeparation;
+            var centerX = node.x+(node.width / 2);
+            var centerY = (node.y - DvConfig.LevelSeparation / 2);
             svgPath += "M " + centerX + " " + node.y + "L " + centerX + " " + centerY;
-            if(node.__proto__.offspring != null){
+            if(node.offspring != null){
                 //node有子节点
-                var centerX = node.__proto__.x+(node.__proto__.width / 2);
-                var centerY = (node.__proto__.y + DvConfig.LevelSeparation / 2);
+                var centerX = node.x+(node.width / 2);
+                var centerY = (node.y + DvConfig.LevelSeparation / 2);
                 svgPath += "M " + centerX + " " + node.y + "L " + centerX + " " + centerY;
                 //父节点和子节点间的横线
                 {
                     var leftMostNode = this.toNextLevelLeftMost(node);
                     var rightMostNode = this.toNextLevelRightMost(node);
-                    var leftCoorX = leftMostNode.__proto__.x +(leftMostNode.__proto__.width / 2);
-                    var leftCoorY = leftMostNode.__proto__.y +  DvConfig.LevelSeparation / 2;
-                    var rightCoorX = rightMostNode.__proto__.x + (rightMostNode.__proto__.width / 2);
-                    var rightCoorY = rightMostNode.__proto__.y + DvConfig.LevelSeparation / 2;
-                    console.log("X是否相等",leftMostNode, rightMostNode)
+                    var leftCoorX = leftMostNode.x +(leftMostNode.width / 2);
+                    var leftCoorY = leftMostNode.y +  DvConfig.LevelSeparation / 2;
+                    var rightCoorX = rightMostNode.x + (rightMostNode.width / 2);
+                    var rightCoorY = rightMostNode.y + DvConfig.LevelSeparation / 2;
+                    console.log("X是否相等",leftMostNode,leftMostNode.y, rightCoorX)
                     console.log("Y是否相等",leftCoorY == rightCoorY)
                     svgPath += "M " + leftCoorX + " " + leftCoorY + "L " + rightCoorX + " " + rightCoorY;
                 }
-                this.calculate(node.__proto__.offspring,modifierSum+node.__proto__.modifier);
+                this.calculate(node.offspring,modifierSum+node.modifier);
             }
         }
     }
