@@ -1,7 +1,13 @@
 define(['./node','./config'],function(Node,DvConfig) {
     'use strict';
-    var Dv = function(context){
-        this.context = context;
+    var Dv = function(domId){
+        this.dom = document.getElementById(domId);
+        this.context = this.dom.getContext("2d");
+        this.context.save();
+        this.viewport = {
+            x:0,
+            y:0
+        }
     }
 
     var level = 0;      //标记当前指向节点的level
@@ -30,8 +36,8 @@ define(['./node','./config'],function(Node,DvConfig) {
     }
 
     Dv.prototype.toNextLevelLeftMost = function(startNode){
-        var tmp = startNode.offspring;
-        console.log("hahahah:",startNode.offspring.key);
+        var tmp = Object.assign({},startNode.offspring);
+        
         return tmp;
     }
 
@@ -117,7 +123,7 @@ define(['./node','./config'],function(Node,DvConfig) {
         startNode.modifier = 0;
 
         //打印全部用来调试
-        this.print();
+        //this.print();
     }
 
     Dv.prototype.print = function(){
@@ -158,7 +164,6 @@ define(['./node','./config'],function(Node,DvConfig) {
 
         if(rx - lx < DvConfig.SubtreeSeparation + (lNode.width + rNode.width) / 2){
             adjust = DvConfig.SubtreeSeparation + (lNode.width + rNode.width) / 2 - (rx - lx);
-            this.printNode("调整的节点:",rNode);
         }
 
         if(adjust != 0){
@@ -174,7 +179,6 @@ define(['./node','./config'],function(Node,DvConfig) {
             var tmp = leftMostNode;
             var count = 0;  //count是中间夹着的节点数
             for(var i = 1; i < levelList[1].length && levelList[1][i] != rNode;i++){
-                this.printNode("夹在中间的调整点:",levelList[1][i]);
                 count++;
             }
 
@@ -189,14 +193,37 @@ define(['./node','./config'],function(Node,DvConfig) {
         }
     }
 
-
+    /**
+     * 遍历计算节点的x,y
+     */
     Dv.prototype.calculate = function(node,modifierSum){
         if(node == null){
             return;
         }
-        this.printNode("计算点:",node);
         node.x = node.prelim + modifierSum;
-        node.y = node.level * DvConfig.LevelSeparation;
+        node.y = node.level * (DvConfig.LevelSeparation + node.height);
+
+        if(node.offspring != null){
+            this.calculate(node.offspring,modifierSum+node.modifier);
+        }
+
+        while(node.rightSibling != null){
+            node = node.rightSibling;
+            node.x = node.prelim + modifierSum;
+            node.y = node.level * (DvConfig.LevelSeparation + node.height);
+            if(node.offspring != null){
+                this.calculate(node.offspring,modifierSum+node.modifier);
+            }
+        }
+    }
+
+    /**
+     * 计算应该绘制的路径
+     */
+    Dv.prototype.calculatePath = function(node){
+        if(node == null){
+            return;
+        }
 
         if(node.parent != null){
             //node有父节点
@@ -209,47 +236,44 @@ define(['./node','./config'],function(Node,DvConfig) {
         if(node.offspring != null){
             //node有子节点
             var centerX = node.x+(node.width / 2);
-            var centerY = (node.y + DvConfig.LevelSeparation / 2);
-            svgPath += "M " + centerX + " " + node.y + "L " + centerX + " " + centerY;
+            var centerY = (node.y + node.height + DvConfig.LevelSeparation / 2);
+            svgPath += "M " + centerX + " " + (node.y + node.height) + "L " + centerX + " " + centerY;
             //父节点和子节点间的横线
             {
                 var leftMostNode = this.toNextLevelLeftMost(node);
                 var rightMostNode = this.toNextLevelRightMost(node);
                 var leftCoorX = leftMostNode.x +(leftMostNode.width / 2);
-                var leftCoorY = leftMostNode.y +  DvConfig.LevelSeparation / 2;
+                var leftCoorY = leftMostNode.y - DvConfig.LevelSeparation / 2;
                 var rightCoorX = rightMostNode.x + (rightMostNode.width / 2);
-                var rightCoorY = rightMostNode.y + DvConfig.LevelSeparation / 2;
+                var rightCoorY = rightMostNode.y - DvConfig.LevelSeparation / 2;
                
                 svgPath += "M " + leftCoorX + " " + leftCoorY + "L " + rightCoorX + " " + rightCoorY;
             }
-            this.calculate(node.offspring,modifierSum+node.modifier);
+            this.calculatePath(node.offspring);
         }
 
         while(node.rightSibling != null){
             node = node.rightSibling;
-            node.x = node.prelim + modifierSum;
-            node.y = node.level * DvConfig.LevelSeparation;
             var centerX = node.x+(node.width / 2);
             var centerY = (node.y - DvConfig.LevelSeparation / 2);
             svgPath += "M " + centerX + " " + node.y + "L " + centerX + " " + centerY;
             if(node.offspring != null){
                 //node有子节点
                 var centerX = node.x+(node.width / 2);
-                var centerY = (node.y + DvConfig.LevelSeparation / 2);
-                svgPath += "M " + centerX + " " + node.y + "L " + centerX + " " + centerY;
+                var centerY = (node.y + node.height + DvConfig.LevelSeparation / 2);
+                svgPath += "M " + centerX + " " + (node.y + node.height) + "L " + centerX + " " + centerY;
                 //父节点和子节点间的横线
                 {
                     var leftMostNode = this.toNextLevelLeftMost(node);
                     var rightMostNode = this.toNextLevelRightMost(node);
                     var leftCoorX = leftMostNode.x +(leftMostNode.width / 2);
-                    var leftCoorY = leftMostNode.y +  DvConfig.LevelSeparation / 2;
+                    var leftCoorY = leftMostNode.y  - DvConfig.LevelSeparation / 2;
                     var rightCoorX = rightMostNode.x + (rightMostNode.width / 2);
-                    var rightCoorY = rightMostNode.y + DvConfig.LevelSeparation / 2;
-                    console.log("X是否相等",leftMostNode,leftMostNode.y, rightCoorX)
-                    console.log("Y是否相等",leftCoorY == rightCoorY)
+                    var rightCoorY = rightMostNode.y  - DvConfig.LevelSeparation / 2;
+
                     svgPath += "M " + leftCoorX + " " + leftCoorY + "L " + rightCoorX + " " + rightCoorY;
                 }
-                this.calculate(node.offspring,modifierSum+node.modifier);
+                this.calculatePath(node.offspring);
             }
         }
     }
@@ -257,6 +281,7 @@ define(['./node','./config'],function(Node,DvConfig) {
     //最后一次遍历扫描
     Dv.prototype.finishCal = function(node){
         this.calculate(node,0);
+        this.calculatePath(node);
     }
 
     //前序遍历
@@ -264,14 +289,16 @@ define(['./node','./config'],function(Node,DvConfig) {
 
     }
 
-    //绘图
+    /**
+     * 绘制，会对节点进行计算
+     */
     Dv.prototype.paint = function(startNode){
         this.postOrder(startNode);
         this.finishCal(startNode);
         //遍历levelList进行绘图
         for(var i = 0; i < levelList.length; i++){
             for(var j = 0; j < levelList[i].length;j++){
-                this.context.strokeRect(levelList[i][j].x,levelList[i][j].y,40,60);
+                this.context.strokeRect(levelList[i][j].x,levelList[i][j].y,levelList[i][j].width,levelList[i][j].height);
                 this.context.fillText(levelList[i][j].key,levelList[i][j].x,levelList[i][j].y);
             }
         }
@@ -279,6 +306,68 @@ define(['./node','./config'],function(Node,DvConfig) {
         //画path
         var path = new Path2D(svgPath);
         this.context.stroke(path);
+    }
+
+    /**
+     * 重新绘制，不会对节点进行计算
+     */
+    Dv.prototype.repaint = function(){
+        //遍历levelList进行绘图
+        for(var i = 0; i < levelList.length; i++){
+            for(var j = 0; j < levelList[i].length;j++){
+                this.context.strokeRect(levelList[i][j].x,levelList[i][j].y,levelList[i][j].width,levelList[i][j].height);
+                this.context.fillText(levelList[i][j].key,levelList[i][j].x,levelList[i][j].y);
+            }
+        }
+
+        //画path
+        var path = new Path2D(svgPath);
+        this.context.stroke(path);
+    }
+
+    /**
+     * 设置画布是否拖动(触摸屏的拖动事件)
+     */
+    Dv.prototype.setDraggable = function(isDraggable,dragEvent){
+
+        dragEvent = typeof dragEvent  === 'undefined' ? function(){} : dragEvent;
+
+        var x = 0;
+        var y = 0;
+        var self = this;
+
+        var mouseDownEvent = function(event){
+            x = event.clientX;
+            y = event.clientY;
+            self.dom.addEventListener('mousemove',mouseMoveEvent);
+        }
+
+        var mouseMoveEvent = function(event){
+            if(event.clientX != x && event.clientY != y){
+                var xOffset = event.clientX - x;
+                var yOffset = event.clientY - y;
+                self.viewport.x -= xOffset;
+                self.viewport.y -= yOffset;
+                self.context.translate(xOffset,yOffset);
+                self.context.clearRect(self.viewport.x,self.viewport.y,self.dom.width,self.dom.height);
+                self.repaint();
+                dragEvent();
+                x = event.clientX;
+                y = event.clientY;
+            }
+        }
+
+        var mouseUpEvent = function(event){
+            self.dom.removeEventListener("mousemove",mouseMoveEvent);
+        }
+
+        if(isDraggable){
+            //对于鼠标操作的拖动方法
+            this.dom.addEventListener('mousedown',mouseDownEvent);
+            this.dom.addEventListener('mouseup',mouseUpEvent);
+        }else{
+            this.dom.removeEventListener("drag",dragEvent);
+        }
     }
 
     return Dv;

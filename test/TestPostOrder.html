@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>画图</title>
-        <script src="require.js"></script>
+        <script src="../src/require.js"></script>
         <style type="text/css">
             canvas{
                 border:1px solid #000;
@@ -14,8 +14,8 @@
         <canvas id="main" width="2000" height="800">当前浏览器不支持canvas</canvas>
         <script>
             require([
-                '../core/node',
-                '../core/dv'
+                '../src/node',
+                '../src/dv'
             ], function(Node,Dv) {
                 'use strict';
                 var log = console.log.bind(console);
@@ -89,9 +89,7 @@
                 L.parent = M;
                 L.leftSibling = K;
 
-
-                var context = document.getElementById('main').getContext('2d');
-                var dv = new Dv(context);
+                var dv = new Dv("main");
                 dv.postOrder(O);
 
                 log("A:",A.prelim,A.modifier);
