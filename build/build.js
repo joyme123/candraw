@@ -1,10 +1,11 @@
 ({
     appDir: "../src",
     baseUrl: ".",
-    dir: "../../appdirectory-build",
+    dir: "../dist",
     modules: [
         {
             name: "dv"
         }
-    ]
+    ],
+    removeCombined:true
 })
