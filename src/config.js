@@ -14,6 +14,7 @@ define(function() {
         MaximumDepth:100,
         SiblingSeparation:80,
         SubtreeSeparation:80,
+        SpouseSeparation:40,
         LevelSeparation:120,
     }
 
